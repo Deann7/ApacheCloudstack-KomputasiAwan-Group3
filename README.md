@@ -41,8 +41,14 @@
 
 ## Background
 
-This document presents an installation guide for Apache CloudStack on a single node to build a private cloud environment. Apache CloudStack is an open-source platform for managing large-scale cloud infrastructure. In this guide, all components — management server, hypervisor, and storage — run on a single physical machine. The material was prepared by a team from the Computer Engineering Study Program, Department of Electrical Engineering, Universitas Indonesia.
+![cover](https://th.bing.com/th/id/R.ca5c6d30f86c5e0e2dbd2f819da0bb0b?rik=0dlTz8ogHC4rQQ&riu=http%3a%2f%2fdocs.cloudstack.apache.org%2fen%2flatest%2f_images%2facslogo.png&ehk=QPmWD4jFZkM2q4JSYGrx3rWXSJZMNCRMlES782jYfaU%3d&risl=&pid=ImgRaw&r=0)
 
+
+
+Apache CloudStack is an open-source platform for managing large-scale cloud infrastructure. CloudStack provides a complete IaaS (Infrastructure as a Service) stack that supports multiple hypervisors such as KVM, VMware, and XenServer and exposes a web-based dashboard, a RESTful API, and a command-line interface for managing compute, network, and storage resources. It organizes infrastructure into a logical hierarchy: **Zones** represent physical locations or datacenters, **Pods** correspond to Layer 2 network segments within a zone, **Clusters** group hypervisor hosts of the same type, and **Hosts** are the physical machines that run virtual machine instances. This hierarchy allows CloudStack to intelligently schedule and place VM workloads across available resources.
+
+
+In this guide, all components including management server, hypervisor, and storage run on a single physical machine. 
 
 
 ## Objectives
@@ -50,7 +56,6 @@ This document presents an installation guide for Apache CloudStack on a single n
 - Provide a step-by-step installation guide for Apache CloudStack in a single-node environment.
 - Present a well-structured and easy-to-follow report.
 - Document the complete installation process including troubleshooting encountered during setup.
-
 
 
 ## Scope
@@ -78,7 +83,7 @@ This guide covers:
 **Group 3:**
 
 | Name | NPM |
-||--|
+|---|---|
 | Deandro Najwan Ahmad Syahbanna | 2302613174 |
 | Muhammad Nadzhif Fikri | 2306210102 |
 | Dwigina Sitti Zahwa | 2306250724 |
@@ -96,9 +101,9 @@ This guide covers:
 Before starting the installation, ensure the following requirements are met:
 
 | Requirement | Details |
-|-||
+|---|---|
 | **OS** | Ubuntu 22.04 LTS with hardware virtualization support (Intel VT-x or AMD-V enabled in BIOS) |
-| **Network** | A `/24` network with a static gateway (e.g., `***.***.***.1`) — avoid DHCP to prevent dynamic IP conflicts for VMs |
+| **Network** | A `/24` network with a static gateway  avoid DHCP to prevent dynamic IP conflicts for VMs |
 | **RAM** | Minimum 4 GB (8 GB+ recommended) |
 | **Storage** | Minimum 50 GB free disk space |
 | **Access** | Root or `sudo` privileges |
@@ -529,7 +534,7 @@ http://<management-server-ip>:8080/client/
 **Default login credentials:**
 
 | Field    | Value      |
-|-||
+|---|---|
 | Username | `admin`    |
 | Password | `password` |
 
