@@ -87,7 +87,13 @@ Tim penyusun Group 3:
 
 ---
 
+## Arsitektur Sistem
+
+![Arsitektur Apache CloudStack](./images/architectureApacheCloudstack.png)
+
 ## Panduan Instalasi
+
+![Alur Instalasi](./images/installation.png)
 
 ### Persiapan Awal
 
