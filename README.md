@@ -2,80 +2,76 @@
 
 ## Program Studi Teknik Komputer, Departemen Teknik Elektro, Universitas Indonesia
 
-![image](https://github.com/user-attachments/assets/7f2482b6-7a3c-49ac-912c-8d22d042740b)
+![Universitas Indonesia](https://github.com/user-attachments/assets/7f2482b6-7a3c-49ac-912c-8d22d042740b)
 
-## Daftar Isi
+## Table of Contents
 
-- [Latar Belakang](#latar-belakang)
-- [Tujuan](#tujuan)
-- [Ruang Lingkup](#ruang-lingkup)
-- [Referensi](#referensi)
-- [Kontributor](#kontributor)
-- [Panduan Instalasi](#panduan-instalasi)
-  - [Persiapan Awal](#persiapan-awal)
-  - [Install Chrony](#install-chrony)
-  - [Install Java 17 JRE](#install-java-17-jre)
-  - [Install bridge-utils](#install-bridge-utils)
-  - [Add CloudStack Repository](#add-cloudstack-repository)
-  - [Repository Key](#repository-key)
-  - [Install MySQL Server](#install-mysql-server)
-  - [Set Up CloudStack Database](#set-up-cloudstack-database)
-  - [Konfigurasi NFS untuk Primary dan Secondary Storage](#konfigurasi-nfs-untuk-primary-dan-secondary-storage)
-  - [Pengaturan Firewall](#pengaturan-firewall)
-  - [Menjalankan Service CloudStack](#menjalankan-service-cloudstack)
-  - [Instalasi KVM](#instalasi-kvm)
-  - [Tambahkan Pengguna ke Grup libvirt dan kvm](#tambahkan-pengguna-ke-grup-libvirt-dan-kvm)
-  - [Enable dan Start Libvirt](#enable-dan-start-libvirt)
-  - [Install CloudStack Agent & UI](#install-cloudstack-agent--ui)
-  - [Start CloudStack Management](#start-cloudstack-management)
-  - [Akses CloudStack Dashboard](#akses-cloudstack-dashboard)
-- [Membuat Zone Baru](#membuat-zone-baru)
-  - [Pemilihan Tipe Zone](#pemilihan-tipe-zone)
-  - [Pemilihan Tipe Jaringan](#pemilihan-tipe-jaringan)
-  - [Mengisi Detail Zone](#mengisi-detail-zone)
-  - [Konfigurasi Jaringan](#konfigurasi-jaringan)
-  - [Menambahkan Resource](#menambahkan-resource)
-  - [Meluncurkan Zone](#meluncurkan-zone)
-- [Konfigurasi dan Instalasi VM](#konfigurasi-dan-instalasi-vm)
-  - [Mendaftarkan ISO](#mendaftarkan-iso)
-  - [Membuat Compute Offering](#membuat-compute-offering)
-  - [Membuat Instance Baru](#membuat-instance-baru)
-  - [Instalasi Ubuntu Server](#instalasi-ubuntu-server)
-- [Konfigurasi Jaringan CloudStack](#konfigurasi-jaringan-cloudstack)
-  - [Konfigurasi Egress](#konfigurasi-egress)
-  - [Konfigurasi Port Forwarding](#konfigurasi-port-forwarding)
+- [Background](#background)
+- [Objectives](#objectives)
+- [Scope](#scope)
+- [References](#references)
+- [Contributors](#contributors)
+- [Prerequisites](#prerequisites)
+- [Installation Guide](#installation-guide)
+  - [1. System Preparation](#1-system-preparation)
+  - [2. Install Chrony (Time Synchronization)](#2-install-chrony-time-synchronization)
+  - [3. Install Java 17 JRE](#3-install-java-17-jre)
+  - [4. Install bridge-utils](#4-install-bridge-utils)
+  - [5. Add CloudStack Repository](#5-add-cloudstack-repository)
+  - [6. Add Repository Key](#6-add-repository-key)
+  - [7. Install CloudStack Management Server](#7-install-cloudstack-management-server)
+  - [8. Install and Configure MySQL Server](#8-install-and-configure-mysql-server)
+  - [9. Set Up CloudStack Database](#9-set-up-cloudstack-database)
+  - [10. Configure NFS for Primary and Secondary Storage](#10-configure-nfs-for-primary-and-secondary-storage)
+  - [11. Configure Firewall](#11-configure-firewall)
+  - [12. Start CloudStack Services](#12-start-cloudstack-services)
+  - [13. Install KVM Hypervisor](#13-install-kvm-hypervisor)
+  - [14. Install CloudStack Agent & UI](#14-install-cloudstack-agent--ui)
+  - [15. Start CloudStack Management](#15-start-cloudstack-management)
+  - [16. Access the CloudStack UI](#16-access-the-cloudstack-ui)
+- [Zone Configuration](#zone-configuration)
+  - [Add Zone (Basic) — First Attempt](#add-zone-basic--first-attempt)
+  - [Add Zone (Advanced)](#add-zone-advanced)
+  - [Troubleshooting](#troubleshooting)
+- [Known Issues](#known-issues)
 
-## Latar Belakang
+## Background
 
-Dokumen ini menyajikan panduan instalasi Apache CloudStack pada satu node untuk penyusunan cloud privat. Apache CloudStack adalah platform open-source untuk mengelola infrastruktur cloud berskala besar. Dalam panduan ini, seluruh komponen (management server, hypervisor, dan storage) dijalankan pada satu mesin fisik. Materi ini disusun oleh tim yang berasal dari Program Studi Teknik Komputer, Departemen Teknik Elektro, Universitas Indonesia.
+![cover](https://th.bing.com/th/id/R.ca5c6d30f86c5e0e2dbd2f819da0bb0b?rik=0dlTz8ogHC4rQQ&riu=http%3a%2f%2fdocs.cloudstack.apache.org%2fen%2flatest%2f_images%2facslogo.png&ehk=QPmWD4jFZkM2q4JSYGrx3rWXSJZMNCRMlES782jYfaU%3d&risl=&pid=ImgRaw&r=0)
 
-## Tujuan
+Apache CloudStack is an open-source platform for managing large-scale cloud infrastructure. CloudStack provides a complete IaaS (Infrastructure as a Service) stack that supports multiple hypervisors such as KVM, VMware, and XenServer and exposes a web-based dashboard, a RESTful API, and a command-line interface for managing compute, network, and storage resources. It organizes infrastructure into a logical hierarchy: **Zones** represent physical locations or datacenters, **Pods** correspond to Layer 2 network segments within a zone, **Clusters** group hypervisor hosts of the same type, and **Hosts** are the physical machines that run virtual machine instances. This hierarchy allows CloudStack to intelligently schedule and place VM workloads across available resources.
 
-- Menyediakan panduan langkah-demi-langkah instalasi Apache CloudStack dalam lingkungan satu node.
-- Menyajikan struktur laporan yang rapi dan mudah diikuti.
-- Mendokumentasikan proses pembuatan zone, deployment VM, dan konfigurasi jaringan pada CloudStack.
+In this guide, all components including management server, hypervisor, and storage run on a single physical machine.
 
-## Ruang Lingkup
+## Objectives
 
-Panduan ini mencakup:
+- Provide a step-by-step installation guide for Apache CloudStack in a single-node environment.
+- Present a well-structured and easy-to-follow report.
+- Document the complete installation process including troubleshooting encountered during setup.
 
-- Persiapan lingkungan dan prasyarat perangkat lunak.
-- Langkah instalasi Apache CloudStack di satu node.
-- Konfigurasi dasar untuk akses cloud privat.
-- Pembuatan zone dengan Advanced Networking.
-- Deployment virtual machine dan konfigurasi jaringan.
+## Scope
 
-## Referensi
+This guide covers:
+
+- Environment preparation and software prerequisites.
+- Apache CloudStack installation steps on a single node running Ubuntu 22.04.
+- Basic configuration for private cloud access including KVM hypervisor setup, NFS storage configuration, and zone creation.
+- Zone configuration (Basic and Advanced Networking).
+- Troubleshooting performed during the installation process.
+
+## References
 
 - [Installing Apache CloudStack on Ubuntu 22 — Pratyukt (Hashnode)](https://pratyukt.hashnode.dev/installing-apache-cloudstack-on-ubuntu-22)
+- [Apache CloudStack Official Documentation](https://docs.cloudstack.apache.org/)
+- [Apache CloudStack GitHub](https://github.com/apache/cloudstack)
 
-## Kontributor
+## Contributors
 
-Tim penyusun Group 3:
+**Group 3:**
 
-| Nama                           | NPM        |
+| Name                           | NPM        |
 | ------------------------------ | ---------- |
-| Deandro Najwan Ahmad Syahbanna | 2306213174 |
+| Deandro Najwan Ahmad Syahbanna | 2302613174 |
 | Muhammad Nadzhif Fikri         | 2306210102 |
 | Dwigina Sitti Zahwa            | 2306250724 |
 | Muhamad Rey Kafaka Fadlan      | 2306250573 |
@@ -85,19 +81,23 @@ Tim penyusun Group 3:
 | Dimas Dandossi W P             | 2206059780 |
 | Abednego Zebua                 | 2306161883 |
 
----
+## Prerequisites
 
-## Arsitektur Sistem
+Before starting the installation, ensure the following requirements are met:
 
-![Arsitektur Apache CloudStack](./images/architectureApacheCloudstack.png)
+| Requirement | Details                                                                                     |
+| ----------- | ------------------------------------------------------------------------------------------- |
+| **OS**      | Ubuntu 22.04 LTS with hardware virtualization support (Intel VT-x or AMD-V enabled in BIOS) |
+| **Network** | A `/24` network with a static gateway avoid DHCP to prevent dynamic IP conflicts for VMs    |
+| **RAM**     | Minimum 4 GB (8 GB+ recommended)                                                            |
+| **Storage** | Minimum 50 GB free disk space                                                               |
+| **Access**  | Root or `sudo` privileges                                                                   |
 
-## Panduan Instalasi
+## Installation Guide
 
-![Alur Instalasi](./images/installation.png)
+### 1. System Preparation
 
-### Persiapan Awal
-
-1. Perbarui daftar paket pada sistem:
+Start by updating the package list to ensure the system is up to date:
 
 ```bash
 sudo apt update -y
@@ -113,7 +113,7 @@ sudo apt install openssh-server -y
 
 ![image](https://hackmd.io/_uploads/HkUiNOKA-e.png)
 
-3. Verifikasi alamat IP pada mesin:
+Check the machine's IP address and note it down — it will be used throughout the configuration:
 
 ```bash
 ip a
@@ -121,53 +121,72 @@ ip a
 
 ![image](https://hackmd.io/_uploads/HkG0H_Y0bl.png)
 
-- Contoh IP yang diperoleh: `192.168.105.197/24`
+> **Note:** In this setup, the machine IP is `192.168.18.1/24`. Replace this with your actual IP address in all subsequent steps.
+
+Configure Netplan according to your network topology and ensure the network interface is connected to the correct subnet.
 
 4. Konfigurasi Netplan sesuai dengan topologi jaringan yang digunakan. Pastikan interface jaringan terhubung ke subnet yang sesuai.
 
-### Install Chrony
+```bash
+hostname --fqdn
+ping 8.8.8.8
+```
 
-Chrony digunakan untuk sinkronisasi waktu (NTP). Sinkronisasi waktu yang akurat penting agar komponen CloudStack dapat berkomunikasi dengan benar.
+### 2. Install Chrony (Time Synchronization)
+
+Chrony is used for NTP time synchronization. Accurate time synchronization is critical — clock drift between the management server and agents is a common source of CloudStack failures.
 
 ```bash
 sudo apt install chrony -y
 ```
 
-![image](https://hackmd.io/_uploads/H1DU2-kyfx.png)
+![install chrony](https://hackmd.io/_uploads/H1DU2-kyfx.png)
 
 ### Install Java 17 JRE
 
-Apache CloudStack membutuhkan Java Runtime Environment versi 17 untuk menjalankan management server.
+### 3. Install Java 17 JRE
+
+Apache CloudStack requires Java Runtime Environment version 17 to run the management server.
 
 ```bash
 sudo apt install openjdk-17-jre -y
 ```
 
-![image](https://hackmd.io/_uploads/B1Rd2WJyzl.png)
+![install java](https://hackmd.io/_uploads/B1Rd2WJyzl.png)
 
 ### Install bridge-utils
 
-Paket `bridge-utils` diperlukan untuk membuat dan mengelola network bridge pada hypervisor.
+### 4. Install bridge-utils
+
+`bridge-utils` provides tools for creating and managing network bridges on the hypervisor, which are required by CloudStack for VM network connectivity.
 
 ```bash
 sudo apt install bridge-utils -y
 ```
 
-![image](https://hackmd.io/_uploads/S1FRNZk1Gl.png)
+![install bridge-utils](https://hackmd.io/_uploads/S1FRNZk1Gl.png)
 
 ### Add CloudStack Repository
 
-Tambahkan repository resmi Apache CloudStack versi 4.20 ke daftar sumber paket:
+### 5. Add CloudStack Repository
+
+Add the official Apache CloudStack 4.20 package repository for Ubuntu:
 
 ```bash
 echo "deb https://download.cloudstack.org/ubuntu focal 4.20" | sudo tee /etc/apt/sources.list.d/cloudstack.list
 ```
 
-![image](https://hackmd.io/_uploads/r1GxT-1yfe.png)
+![add repo](https://hackmd.io/_uploads/r1GxT-1yfe.png)
 
-### Repository Key
+Update the package list after adding the repository:
 
-Tambahkan kunci GPG repository untuk verifikasi keaslian paket:
+```bash
+sudo apt update
+```
+
+### 6. Add Repository Key
+
+Import the CloudStack repository GPG key to verify package authenticity:
 
 ```bash
 wget -O - https://download.cloudstack.org/release.asc | sudo tee /etc/apt/trusted.gpg.d/cloudstack.asc
@@ -175,11 +194,19 @@ wget -O - https://download.cloudstack.org/release.asc | sudo tee /etc/apt/truste
 
 ![image](https://hackmd.io/_uploads/H1L86Zy1fl.png)
 
-### Install MySQL Server
+### 7. Install CloudStack Management Server
 
-CloudStack menggunakan MySQL sebagai backend database. Lakukan instalasi dan konfigurasi awal:
+Install the CloudStack management server package:
 
-1. Instal MySQL Server:
+```bash
+sudo apt install cloudstack-management -y
+```
+
+### 8. Install and Configure MySQL Server
+
+CloudStack uses MySQL as its database backend.
+
+**Step 1 — Install MySQL Server:**
 
 ```bash
 sudo apt install mysql-server -y
@@ -187,7 +214,7 @@ sudo apt install mysql-server -y
 
 ![image](https://hackmd.io/_uploads/rkiOMMyJzl.png)
 
-2. Edit file konfigurasi MySQL untuk menyesuaikan parameter yang dibutuhkan CloudStack:
+**Step 2 — Edit the MySQL configuration file** to tune the parameters required by CloudStack:
 
 ```bash
 sudo vi /etc/mysql/mysql.conf.d/mysqld.cnf
@@ -195,40 +222,100 @@ sudo vi /etc/mysql/mysql.conf.d/mysqld.cnf
 
 ![image](https://hackmd.io/_uploads/H1XeAW1kMe.png)
 
-3. Amankan instalasi MySQL dengan menjalankan script keamanan bawaan:
+**Step 3 — Restart MySQL** to apply the configuration changes:
+
+```bash
+sudo systemctl restart mysql
+```
+
+**Step 4 — Secure the MySQL installation** — answer `Y` to all prompts:
 
 ```bash
 sudo mysql_secure_installation
 ```
 
-![image](https://hackmd.io/_uploads/BJ-LJMyJMx.png)
+![mysql secure](https://hackmd.io/_uploads/BJ-LJMyJMx.png)
 
 ### Set Up CloudStack Database
 
-Setelah MySQL terpasang, lakukan setup database CloudStack menggunakan tools bawaan `cloudstack-setup-databases`:
+### 9. Set Up CloudStack Database
+
+Use the built-in CloudStack setup script to initialize the database. Replace `<dbpassword>`, `<rootpassword>`, and `<management-server-ip>` with your actual values:
 
 ```bash
-sudo cloudstack-setup-databases cloud:cloud@localhost --deploy-as=root:<password> -i <management-server-ip>
+sudo cloudstack-setup-databases cloud:<dbpassword>@localhost \
+  --deploy-as=root:<rootpassword> \
+  -e file \
+  -m management_key \
+  -k database_key \
+  -i <management-server-ip>
 ```
 
-![image](https://hackmd.io/_uploads/Hkjazf1Jfx.png)
+> **Example:** If your management server IP is `192.168.18.1`:
+>
+> ```bash
+> sudo cloudstack-setup-databases cloud:cloud@localhost \
+>   --deploy-as=root:<rootpassword> \
+>   -e file -m management_key -k database_key \
+>   -i 192.168.18.1
+> ```
+
+Alternatively, you can manually configure the database by logging into MySQL and running:
+
+```sql
+CREATE DATABASE cloud;
+CREATE DATABASE cloud_usage;
+CREATE USER 'cloud'@'localhost' IDENTIFIED BY '<password>';
+CREATE USER 'cloud'@'%' IDENTIFIED BY '<password>';
+GRANT ALL PRIVILEGES ON cloud.* TO 'cloud'@'localhost';
+GRANT ALL PRIVILEGES ON cloud.* TO 'cloud'@'%';
+GRANT ALL PRIVILEGES ON cloud_usage.* TO 'cloud'@'localhost';
+GRANT ALL PRIVILEGES ON cloud_usage.* TO 'cloud'@'%';
+GRANT PROCESS ON *.* TO 'cloud'@'localhost';
+GRANT PROCESS ON *.* TO 'cloud'@'%';
+FLUSH PRIVILEGES;
+```
+
+![cloudstack db setup 1](https://hackmd.io/_uploads/Hkjazf1Jfx.png)
 
 ![image](https://hackmd.io/_uploads/BJmhffyyfx.png)
 
-### Konfigurasi NFS untuk Primary dan Secondary Storage
+### 10. Configure NFS for Primary and Secondary Storage
 
-NFS (Network File System) digunakan sebagai primary storage dan secondary storage oleh CloudStack. Buat direktori yang diperlukan dan konfigurasi ekspor NFS:
+NFS (Network File System) is used by CloudStack as Primary Storage (VM disks) and Secondary Storage (templates, ISO images, and snapshots).
 
-1. Buat direktori untuk primary dan secondary storage:
+**Step 1 — Install the NFS kernel server:**
+
+```bash
+sudo apt install nfs-kernel-server -y
+```
+
+**Step 2 — Create the storage export directories:**
 
 ```bash
 sudo mkdir -p /export/primary
 sudo mkdir -p /export/secondary
 ```
 
-2. Konfigurasi file `/etc/exports` untuk mengizinkan akses NFS:
+**Step 3 — Edit the NFS exports file** to expose the directories to your network:
 
-![image](https://hackmd.io/_uploads/SJ9QXM1kzx.png)
+```bash
+sudo vi /etc/exports
+```
+
+Add the following line (replace with your actual network subnet):
+
+```
+/export *(rw,async,no_root_squash,no_subtree_check)
+```
+
+**Step 4 — Apply the export changes:**
+
+```bash
+sudo exportfs -a
+```
+
+![nfs config 1](https://hackmd.io/_uploads/SJ9QXM1kzx.png)
 
 ![image](https://hackmd.io/_uploads/ryCA7zJyMl.png)
 
@@ -236,7 +323,7 @@ sudo mkdir -p /export/secondary
 
 ![image](https://hackmd.io/_uploads/SJGRgvi1fg.png)
 
-3. Edit konfigurasi NFS kernel server:
+**Step 5 — Edit the NFS kernel server defaults** to set fixed ports (required for firewall rules):
 
 ```bash
 sudo vi /etc/default/nfs-kernel-server
@@ -244,17 +331,25 @@ sudo vi /etc/default/nfs-kernel-server
 
 ![image](https://hackmd.io/_uploads/rJrHVf1kMx.png)
 
-### Pengaturan Firewall
+**Step 6 — Restart the NFS server** to apply all changes:
 
-Izinkan akses pada port-port yang diperlukan oleh CloudStack melalui UFW. Port-port berikut digunakan untuk komunikasi NFS dan akses management server:
+```bash
+sudo systemctl restart nfs-kernel-server
+```
 
-| Port  | Protokol | Fungsi                   |
+### 11. Configure Firewall
+
+Open the required ports for CloudStack and NFS communication. The table below lists all ports that must be allowed:
+
+| Port  | Protocol | Purpose                  |
 | ----- | -------- | ------------------------ |
 | 111   | TCP/UDP  | RPC Portmapper           |
 | 2049  | TCP      | NFS                      |
-| 32803 | TCP      | NFS mountd               |
-| 32769 | UDP      | NFS lockd                |
+| 32803 | TCP      | NFS Lock Daemon (lockd)  |
+| 32769 | UDP      | NFS Lock Daemon (lockd)  |
 | 8080  | TCP      | CloudStack Management UI |
+
+Run the following commands (replace `192.168.105.0/24` with your actual network subnet):
 
 ```bash
 sudo ufw allow from 192.168.105.0/24 to any proto udp port 111
@@ -265,13 +360,15 @@ sudo ufw allow from 192.168.105.0/24 to any proto udp port 32769
 sudo ufw allow 8080/tcp
 ```
 
-![image](https://hackmd.io/_uploads/r1x-LDi1Gg.png)
+![firewall rules 1](https://hackmd.io/_uploads/r1x-LDi1Gg.png)
 
-![image](https://hackmd.io/_uploads/S1qvBwsyMl.png)
+![firewall rules 2](https://hackmd.io/_uploads/S1qvBwsyMl.png)
 
 ### Menjalankan Service CloudStack
 
-Aktifkan dan jalankan layanan pendukung (RPC dan NFS), kemudian jalankan setup management CloudStack:
+### 12. Start CloudStack Services
+
+Enable and start the required background services (RPC and NFS), then run the CloudStack management setup:
 
 ```bash
 sudo systemctl start rpcbind
@@ -281,18 +378,18 @@ sudo systemctl enable nfs-kernel-server
 sudo cloudstack-setup-management
 ```
 
-### Instalasi KVM
+### 13. Install KVM Hypervisor
 
-KVM (Kernel-based Virtual Machine) digunakan sebagai hypervisor untuk menjalankan instance virtual machine pada CloudStack.
+KVM (Kernel-based Virtual Machine) is used as the hypervisor to run virtual machine instances on CloudStack.
+
+**Install KVM and its dependencies:**
 
 ```bash
 sudo apt update
 sudo apt install -y qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils virtinst
 ```
 
-### Tambahkan Pengguna ke Grup libvirt dan kvm
-
-Agar pengguna aktif memiliki akses untuk mengelola virtual machine, tambahkan ke grup `libvirt` dan `kvm`:
+**Add the active user to the `libvirt` and `kvm` groups** to allow VM management without root:
 
 ```bash
 sudo usermod -aG libvirt $(whoami)
@@ -300,36 +397,51 @@ sudo usermod -aG kvm $(whoami)
 newgrp libvirt
 ```
 
-### Enable dan Start Libvirt
-
-Aktifkan dan jalankan daemon libvirt, kemudian verifikasi statusnya:
+**Enable and start the `libvirtd` daemon:**
 
 ```bash
 sudo systemctl enable --now libvirtd
 sudo systemctl start libvirtd
+```
+
+Verify that `libvirtd` is running:
+
+```bash
 systemctl status libvirtd
 ```
 
-![image](https://hackmd.io/_uploads/rJ9HRDoJze.png)
+![libvirtd status](https://hackmd.io/_uploads/rJ9HRDoJze.png)
 
-### Install CloudStack Agent & UI
+Verify KVM is working by listing all virtual machines (should return an empty list on a fresh setup):
 
-Instal agent (untuk komunikasi antara management server dan hypervisor) serta UI (antarmuka web):
+```bash
+sudo virsh list --all
+```
+
+### 14. Install CloudStack Agent & UI
+
+Install the CloudStack Agent — this runs on the hypervisor host and handles communication between the management server and the hypervisor:
 
 ```bash
 sudo apt install cloudstack-agent -y
 sudo apt install cloudstack-ui -y
 ```
 
-### Start CloudStack Management
+### 15. Start CloudStack Management
 
-Jalankan service CloudStack management dan verifikasi statusnya:
+Reboot the server to ensure all services and configurations are cleanly loaded:
+
+```bash
+sudo reboot
+```
+
+After rebooting, start the CloudStack management service:
 
 ```bash
 sudo systemctl start cloudstack-management
 ```
 
-Untuk memastikan service berjalan dengan benar:
+Verify the service is running correctly:
 
 ```bash
 systemctl status cloudstack-management
@@ -337,166 +449,160 @@ systemctl status cloudstack-management
 
 ![image](https://hackmd.io/_uploads/B1jwE10JGx.png)
 
-### Akses CloudStack Dashboard
+> **Tip:** CloudStack may take a few minutes to fully initialize after the first start. Monitor the logs with:
+>
+> ```bash
+> sudo tail -f /var/log/cloudstack/management/management-server.log
+> ```
 
-Setelah service berjalan, CloudStack Dashboard dapat diakses melalui browser pada alamat berikut:
+### 16. Access the CloudStack UI
+
+Once the management service is running, open a browser and navigate to:
 
 ```
 http://<management-server-ip>:8080/client/
 ```
 
-Gunakan kredensial default untuk login pertama kali:
+> **Example:** `http://192.168.18.1:8080/client/` or `http://w1660:8080/client/`
 
-- **Username:** `admin`
-- **Password:** `password`
+**Default login credentials:**
 
-![image](https://hackmd.io/_uploads/B1f7210JMg.png)
+| Field    | Value      |
+| -------- | ---------- |
+| Username | `admin`    |
+| Password | `password` |
 
-![image](https://hackmd.io/_uploads/r1skT1AkMg.png)
+![cloudstack login](https://hackmd.io/_uploads/B1f7210JMg.png)
+
+![cloudstack dashboard 1](https://hackmd.io/_uploads/r1skT1AkMg.png)
 
 ![image](https://hackmd.io/_uploads/rktD6eAyzl.png)
 
----
+> **Important:** Change the default admin password immediately after first login.
 
-## Membuat Zone Baru
+## Zone Configuration
 
-Setelah management server aktif dan dashboard dapat diakses, langkah berikutnya adalah membuat **Zone**. Zone merupakan unit deployment terbesar dalam arsitektur CloudStack, merepresentasikan satu lokasi data center.
+After the CloudStack management server is active, the next step is to configure a **Zone** — the largest organizational unit in CloudStack, representing a single datacenter or physical location.
 
-### Pemilihan Tipe Zone
+### Add Zone (Basic) — First Attempt
 
-Pada saat pembuatan zone, terdapat dua pilihan tipe:
+The first attempt used a **Basic Networking** configuration. The following steps were carried out through the CloudStack Dashboard:
 
-- **Core**: Zone standar untuk menjalankan workload komputasi utama. Cocok untuk lingkungan produksi dengan fitur lengkap.
-- **Edge**: Zone ringan yang umumnya digunakan untuk edge computing (misalnya IoT, CDN, atau lokasi remote) dengan resource dan layanan yang lebih terbatas.
+![basic zone 1](https://hackmd.io/_uploads/rJTDpeRkzg.png)
 
-Untuk keperluan panduan ini, pilih **Core** agar seluruh fitur CloudStack tersedia.
+![basic zone 2](https://hackmd.io/_uploads/BJxOTxRJGx.png)
 
-### Pemilihan Tipe Jaringan
+![basic zone 3](https://hackmd.io/_uploads/BJpA2lC1Ge.png)
 
-Selanjutnya, tentukan tipe jaringan yang akan digunakan:
+![basic zone 4](https://hackmd.io/_uploads/Hy8p3eC1fx.png)
 
-- **Basic**: Jaringan flat tanpa VLAN. Setiap VM mendapatkan IP secara langsung. Konfigurasi lebih sederhana.
-- **Advanced**: Mendukung VLAN, virtual router, dan multiple guest network. Memberikan fleksibilitas dan isolasi jaringan yang lebih baik.
+![basic zone 5](https://hackmd.io/_uploads/SkO--WRkfl.png)
 
-### Mengisi Detail Zone
+![basic zone 6](https://hackmd.io/_uploads/SkVI1ZAyMg.png)
 
-Isi informasi dasar zone pada form yang tersedia:
+![basic zone 7](https://hackmd.io/_uploads/r1xWgZAyze.png)
 
-| Field          | Contoh Nilai      | Keterangan                                    |
-| -------------- | ----------------- | --------------------------------------------- |
-| Name           | `Zone-Group3`     | Nama deskriptif untuk zone                    |
-| IPv4 DNS 1     | `8.8.8.8`         | DNS publik untuk resolusi nama domain         |
-| Internal DNS 1 | `192.168.105.197` | IP mesin host, digunakan sebagai DNS internal |
-| Hypervisor     | `KVM`             | Tipe hypervisor yang digunakan                |
+![basic zone 8](https://hackmd.io/_uploads/rJBfxbCyfx.png)
 
-### Konfigurasi Jaringan
+> **Note:** The Basic Networking zone configuration failed at the _Launch Zone_ step due to an error. The zone was deleted and the setup was retried using the Advanced Networking configuration.
 
-#### Physical Network
+### Add Zone (Advanced)
 
-Gunakan konfigurasi default untuk physical network, lalu lanjutkan ke langkah berikutnya.
+The second attempt used **Advanced Networking**, which provides more complete network features such as VLAN support, Virtual Router, and Public IP management.
 
-#### Public Traffic
+Navigate to **Infrastructure → Zones → Add Zone** and select **Advanced** as the network type.
 
-Konfigurasi rentang IP untuk akses publik VM:
+![add zone advanced](https://hackmd.io/_uploads/SySZ8-RyMe.png)
 
-| Field    | Contoh Nilai      | Keterangan                          |
-| -------- | ----------------- | ----------------------------------- |
-| Gateway  | `192.168.105.1`   | Gateway jaringan                    |
-| Netmask  | `255.255.255.0`   | Subnet mask                         |
-| Start IP | `192.168.105.221` | IP awal (pastikan belum digunakan)  |
-| End IP   | `192.168.105.225` | IP akhir (pastikan belum digunakan) |
+![zone advanced 1](https://hackmd.io/_uploads/S1UnL-Rkfe.png)
 
-IP pada rentang ini akan dialokasikan untuk akses publik ke virtual machine.
+Fill in the zone details including the zone name, DNS addresses, and internal DNS:
 
-#### Pod
+| Field          | Value          |
+| -------------- | -------------- |
+| Name           | `Zone-Group3`  |
+| IPv4 DNS 1     | `8.8.8.8`      |
+| Internal DNS 1 | `192.168.18.1` |
+| Hypervisor     | `KVM`          |
 
-Setiap zone memerlukan minimal satu **Pod**, yaitu unit yang mengelompokkan cluster dan host.
+![zone advanced 2](https://hackmd.io/_uploads/BkYMOZRkfe.png)
 
-| Field    | Contoh Nilai      | Keterangan                   |
-| -------- | ----------------- | ---------------------------- |
-| Name     | `Pod-Group3`      | Nama deskriptif untuk pod    |
-| Gateway  | `192.168.105.1`   | Gateway jaringan             |
-| Netmask  | `255.255.255.0`   | Subnet mask                  |
-| Start IP | `192.168.105.226` | IP awal untuk manajemen pod  |
-| End IP   | `192.168.105.230` | IP akhir untuk manajemen pod |
+Configure the network settings for the zone:
 
-#### Guest Traffic
+![zone advanced 3](https://hackmd.io/_uploads/SJ87dZR1zx.png)
 
-Tentukan rentang VLAN/VNI untuk isolasi traffic jaringan guest:
+![zone advanced 4](https://hackmd.io/_uploads/B1kSO-0yzg.png)
 
-- **VLAN/VNI Range:** `3300 - 3339`
+![zone advanced 5](https://hackmd.io/_uploads/B1YCOZRJfl.png)
 
-Pastikan VLAN yang dipilih telah dikonfigurasi pada switch atau router jaringan.
+Configure the pod settings (pod name, reserved system gateway, netmask, and IP range):
 
-### Menambahkan Resource
+![zone advanced 6](https://hackmd.io/_uploads/HyOEFbR1zx.png)
 
-#### Cluster
+### Troubleshooting
 
-Cluster berfungsi untuk mengelompokkan host hypervisor yang berbagi konfigurasi storage dan jaringan.
+The following issues were encountered during the zone configuration process:
 
-- **Cluster Name:** `Cluster-Group3`
+#### 1. Error During Launch Zone
 
-#### Host
+An error occurred when attempting to launch the zone:
 
-Masukkan informasi mesin host yang akan menjalankan VM:
+![launch zone error](https://hackmd.io/_uploads/r1Xp4fRkGe.png)
 
-| Field    | Nilai             | Keterangan               |
-| -------- | ----------------- | ------------------------ |
-| Hostname | `192.168.105.197` | IP mesin host            |
-| Username | `root`            | Username akses host      |
-| Password | `******`          | Password root mesin host |
+**Steps taken — Restart services and verify configuration:**
 
-#### Primary Storage
+![troubleshoot 1](https://hackmd.io/_uploads/S182NfAJMx.png)
 
-Primary storage menyimpan disk volume dari VM yang sedang berjalan.
+![troubleshoot 2](https://hackmd.io/_uploads/BkdWLGAJMl.png)
 
-| Field    | Nilai             | Keterangan              |
-| -------- | ----------------- | ----------------------- |
-| Name     | `PrimStor-Group3` | Nama primary storage    |
-| Scope    | `Zone`            | Cakupan storage         |
-| Protocol | `NFS`             | Protokol yang digunakan |
-| Server   | `192.168.105.197` | IP NFS server           |
-| Path     | `/export/primary` | Direktori NFS primary   |
-| Provider | `DefaultPrimary`  | Provider storage        |
+#### 2. Agent Not Activating / Host Cannot Be Added
 
-#### Secondary Storage
+**Symptom:** The CloudStack agent on the host refuses to activate, or the management server cannot connect to the host.
 
-Secondary storage digunakan untuk menyimpan template, ISO, dan snapshot.
+**Step 1 — Verify time synchronization status.**
+CloudStack requires the management server and agent clocks to be in sync. Check Chrony tracking status:
 
-| Field    | Nilai               | Keterangan              |
-| -------- | ------------------- | ----------------------- |
-| Provider | `NFS`               | Provider storage        |
-| Name     | `SecStor-Group3`    | Nama secondary storage  |
-| Server   | `192.168.105.197`   | IP NFS server           |
-| Path     | `/export/secondary` | Direktori NFS secondary |
+```bash
+chronyc tracking
+```
 
-### Meluncurkan Zone
+![chrony tracking](https://hackmd.io/_uploads/HkS0a201Gg.png)
 
-Klik **Launch Zone** untuk memulai proses pembuatan zone dengan seluruh konfigurasi yang telah diisi. Proses ini memerlukan beberapa waktu.
+**Step 2 — Fix hostname resolution** by adding a mapping to `/etc/hosts`:
 
-Jika zone berhasil dibuat, akan muncul notifikasi konfirmasi. Apabila terjadi error, gunakan tombol **Fix Issues** untuk diarahkan ke halaman konfigurasi yang perlu diperbaiki.
+```bash
+sudo vi /etc/hosts
+```
 
-> **Tips:** Error yang umum terjadi biasanya terkait konflik IP address rentang IP yang sudah digunakan oleh perangkat lain dalam jaringan. Coba ganti dengan rentang IP yang belum terpakai dan ulangi proses.
+Add the following line (replace with your actual IP and hostname):
 
-Untuk Contoh Konfigurasi yang kami lakukan dapat dilihat dalam gambar di bawah.
+```
+192.168.18.1w1660
+```
 
-![image](https://hackmd.io/_uploads/rJTDpeRkzg.png)
+![etc hosts](https://hackmd.io/_uploads/SytAp2CyMg.png)
 
-![image](https://hackmd.io/_uploads/BJxOTxRJGx.png)
+**Step 3 — Check the CloudStack agent logs** for detailed error messages:
 
-![image](https://hackmd.io/_uploads/BJpA2lC1Ge.png)
+```bash
+sudo tail -f /var/log/cloudstack/agent/agent.log
+```
 
-![image](https://hackmd.io/_uploads/Hy8p3eC1fx.png)
+**Step 4 — Restart the agent service:**
 
-![image](https://hackmd.io/_uploads/SkO--WRkfl.png)
+```bash
+sudo systemctl restart cloudstack-agent
+systemctl status cloudstack-agent
+```
 
-![image](https://hackmd.io/_uploads/SkVI1ZAyMg.png)
+**Step 5 — Check for port conflicts** and confirm `libvirtd` is running:
 
-![image](https://hackmd.io/_uploads/r1xWgZAyze.png)
+```bash
+sudo systemctl status libvirtd
+sudo netstat -tlnp | grep 16509
+```
 
-![image](https://hackmd.io/_uploads/rJBfxbCyfx.png)
-
----
+> **Known Issue:** In this setup, the agent was intermittently unresponsive despite correct configuration. This appears to be related to timing and host resolution. Restarting both `cloudstack-management` and `cloudstack-agent` in sequence and waiting a few minutes often resolves the issue.
 
 ## Konfigurasi dan Instalasi VM
 
@@ -506,7 +612,7 @@ Setelah zone aktif, langkah selanjutnya adalah menyiapkan resource dan membuat v
 
 Untuk menginstal sistem operasi pada VM, diperlukan file ISO. Cari direct link ISO dari internet (umumnya berakhiran `.iso`). Contoh untuk Ubuntu Server 22.04:
 
-```
+```text
 https://releases.ubuntu.com/jammy/ubuntu-22.04.5-live-server-amd64.iso
 ```
 
@@ -557,8 +663,7 @@ Konfigurasi ini menghasilkan offering dengan 4 core CPU dan 4 GB RAM. Disarankan
    - Klik tab **ISO**, pilih **My ISOs**, lalu pilih ISO yang sudah didaftarkan.
 
 4. **Konfigurasi Network:**
-
-   Jika belum memiliki jaringan, buat **Isolated Network** baru:
+   - Jika belum memiliki jaringan, buat **Isolated Network** baru:
 
    | Field | Nilai                  |
    | ----- | ---------------------- |
