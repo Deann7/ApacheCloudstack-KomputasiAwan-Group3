@@ -30,9 +30,7 @@
   - [15. Start CloudStack Management](#15-start-cloudstack-management)
   - [16. Access the CloudStack UI](#16-access-the-cloudstack-ui)
 - [Zone Configuration](#zone-configuration)
-  - [Add Zone (Basic) — First Attempt](#add-zone-basic--first-attempt)
-  - [Add Zone (Advanced)](#add-zone-advanced)
-  - [Troubleshooting](#troubleshooting)
+
 - [Known Issues](#known-issues)
 
 ## Background
@@ -92,6 +90,14 @@ Before starting the installation, ensure the following requirements are met:
 | **RAM**     | Minimum 4 GB (8 GB+ recommended)                                                            |
 | **Storage** | Minimum 50 GB free disk space                                                               |
 | **Access**  | Root or `sudo` privileges                                                                   |
+
+## Arsitektur Apache Cloudstack
+
+![Arsitektur Apache CloudStack](./images/architectureApacheCloudstack.png)
+
+## Sequence Diagram Instalasi Apache Cloudstack
+
+![Sequence Diagram Instalasi](./images/installation.png)
 
 ## Installation Guide
 
@@ -484,125 +490,27 @@ http://<management-server-ip>:8080/client/
 
 After the CloudStack management server is active, the next step is to configure a **Zone** — the largest organizational unit in CloudStack, representing a single datacenter or physical location.
 
-### Add Zone (Basic) — First Attempt
+### Add Zone
 
-The first attempt used a **Basic Networking** configuration. The following steps were carried out through the CloudStack Dashboard:
+Berikut adalah langkah-langkah pembuatan Zone baru pada Apache CloudStack:
 
-![basic zone 1](https://hackmd.io/_uploads/rJTDpeRkzg.png)
+**1. Bagian Zonanya**
+![Bagian Zona](https://hackmd.io/_uploads/B1Y_je1WGe.png)
 
-![basic zone 2](https://hackmd.io/_uploads/BJxOTxRJGx.png)
+**2. Pilih Tipe Zone (Core zone type)**
+![Core zone type](https://hackmd.io/_uploads/H1UKogJbGg.png)
 
-![basic zone 3](https://hackmd.io/_uploads/BJpA2lC1Ge.png)
+**3. Isi Zone Details**
+![Zone Details](https://hackmd.io/_uploads/ry6ehg1Wfx.png)
 
-![basic zone 4](https://hackmd.io/_uploads/Hy8p3eC1fx.png)
+**4. Konfigurasi Network**
+![Network](https://hackmd.io/_uploads/rJXz3gkbMg.png)
 
-![basic zone 5](https://hackmd.io/_uploads/SkO--WRkfl.png)
+**5. Tambahkan Resources**
+![Resources](https://hackmd.io/_uploads/SyjHhlJ-Ge.png)
 
-![basic zone 6](https://hackmd.io/_uploads/SkVI1ZAyMg.png)
-
-![basic zone 7](https://hackmd.io/_uploads/r1xWgZAyze.png)
-
-![basic zone 8](https://hackmd.io/_uploads/rJBfxbCyfx.png)
-
-> **Note:** The Basic Networking zone configuration failed at the _Launch Zone_ step due to an error. The zone was deleted and the setup was retried using the Advanced Networking configuration.
-
-### Add Zone (Advanced)
-
-The second attempt used **Advanced Networking**, which provides more complete network features such as VLAN support, Virtual Router, and Public IP management.
-
-Navigate to **Infrastructure → Zones → Add Zone** and select **Advanced** as the network type.
-
-![add zone advanced](https://hackmd.io/_uploads/SySZ8-RyMe.png)
-
-![zone advanced 1](https://hackmd.io/_uploads/S1UnL-Rkfe.png)
-
-Fill in the zone details including the zone name, DNS addresses, and internal DNS:
-
-| Field          | Value          |
-| -------------- | -------------- |
-| Name           | `Zone-Group3`  |
-| IPv4 DNS 1     | `8.8.8.8`      |
-| Internal DNS 1 | `192.168.18.1` |
-| Hypervisor     | `KVM`          |
-
-![zone advanced 2](https://hackmd.io/_uploads/BkYMOZRkfe.png)
-
-Configure the network settings for the zone:
-
-![zone advanced 3](https://hackmd.io/_uploads/SJ87dZR1zx.png)
-
-![zone advanced 4](https://hackmd.io/_uploads/B1kSO-0yzg.png)
-
-![zone advanced 5](https://hackmd.io/_uploads/B1YCOZRJfl.png)
-
-Configure the pod settings (pod name, reserved system gateway, netmask, and IP range):
-
-![zone advanced 6](https://hackmd.io/_uploads/HyOEFbR1zx.png)
-
-### Troubleshooting
-
-The following issues were encountered during the zone configuration process:
-
-#### 1. Error During Launch Zone
-
-An error occurred when attempting to launch the zone:
-
-![launch zone error](https://hackmd.io/_uploads/r1Xp4fRkGe.png)
-
-**Steps taken — Restart services and verify configuration:**
-
-![troubleshoot 1](https://hackmd.io/_uploads/S182NfAJMx.png)
-
-![troubleshoot 2](https://hackmd.io/_uploads/BkdWLGAJMl.png)
-
-#### 2. Agent Not Activating / Host Cannot Be Added
-
-**Symptom:** The CloudStack agent on the host refuses to activate, or the management server cannot connect to the host.
-
-**Step 1 — Verify time synchronization status.**
-CloudStack requires the management server and agent clocks to be in sync. Check Chrony tracking status:
-
-```bash
-chronyc tracking
-```
-
-![chrony tracking](https://hackmd.io/_uploads/HkS0a201Gg.png)
-
-**Step 2 — Fix hostname resolution** by adding a mapping to `/etc/hosts`:
-
-```bash
-sudo vi /etc/hosts
-```
-
-Add the following line (replace with your actual IP and hostname):
-
-```
-192.168.18.1w1660
-```
-
-![etc hosts](https://hackmd.io/_uploads/SytAp2CyMg.png)
-
-**Step 3 — Check the CloudStack agent logs** for detailed error messages:
-
-```bash
-sudo tail -f /var/log/cloudstack/agent/agent.log
-```
-
-**Step 4 — Restart the agent service:**
-
-```bash
-sudo systemctl restart cloudstack-agent
-systemctl status cloudstack-agent
-```
-
-**Step 5 — Check for port conflicts** and confirm `libvirtd` is running:
-
-```bash
-sudo systemctl status libvirtd
-sudo netstat -tlnp | grep 16509
-```
-
-> **Known Issue:** In this setup, the agent was intermittently unresponsive despite correct configuration. This appears to be related to timing and host resolution. Restarting both `cloudstack-management` and `cloudstack-agent` in sequence and waiting a few minutes often resolves the issue.
+**Jika Launch Successfull maka akan muncul seperti ini:**
+![Launch Successful](https://hackmd.io/_uploads/S1in3g1ZMg.png)
 
 ## Konfigurasi dan Instalasi VM
 
@@ -693,11 +601,11 @@ Setelah instalasi selesai dan diminta untuk reboot, **detach ISO** dari halaman 
 
 ## Konfigurasi Jaringan CloudStack
 
-Jika menggunakan **Isolated Network**, konfigurasi tambahan diperlukan agar VM dapat mengakses internet dan dapat diakses melalui SSH dari luar.
+Jika menggunakan **Isolated Network**, VM pada awalnya akan terisolasi dari internet dan jaringan luar. Konfigurasi tambahan diperlukan agar VM dapat mengakses internet (Egress) dan dapat diakses dari luar melalui SSH (Ingress/Port Forwarding).
 
-### Konfigurasi Egress
+### 1. Guest Network (Egress Rule)
 
-Agar VM dapat mengakses internet (outbound traffic), lakukan langkah berikut:
+Agar VM dapat mengakses internet (outbound traffic), kita harus mengizinkan lalu lintas Egress dari _Guest Network_.
 
 1. Navigasi ke **Network → Guest Network**.
 2. Klik nama network yang digunakan (misalnya `network-group3`).
@@ -708,42 +616,52 @@ Agar VM dapat mengakses internet (outbound traffic), lakukan langkah berikut:
    - **Protocol:** `All`
 5. Klik **Add**.
 
-Setelah rule diterapkan, perubahan akan terlihat secara langsung pada console VM. Verifikasi koneksi dengan perintah:
+![Guest Network](https://hackmd.io/_uploads/HJg8eZJbzx.png)
 
-```bash
-ping 8.8.8.8
-```
+Setelah rule diterapkan, VM akan memiliki koneksi internet. Anda dapat memverifikasinya melalui console dengan `ping 8.8.8.8`.
 
-> **Alternatif akses:** Selain port forwarding, dapat juga menginstal VPN seperti Tailscale pada VM untuk akses SSH dari mana saja.
+### 2. Public IP Address (Source NAT)
 
-### Konfigurasi Port Forwarding
-
-Untuk mengakses VM melalui SSH dari luar, diperlukan konfigurasi firewall dan port forwarding pada Source NAT IP.
-
-#### 1. Pengaturan Firewall
+Untuk memberikan akses masuk (Ingress) ke dalam VM dari jaringan luar, kita harus menggunakan IP Publik yang disediakan oleh CloudStack. Pada tipe _Isolated Network_, CloudStack akan otomatis mengalokasikan satu IP Publik sebagai **Source NAT**.
 
 1. Navigasi ke **Network → Public IP Addresses**.
-2. Klik pada alamat **Source NAT**.
-3. Buka tab **Firewall**.
-4. Tambahkan rule:
-   - **Source CIDR:** `0.0.0.0/0`
+2. Klik pada alamat yang memiliki label **Source NAT** untuk mengatur Firewall dan Port Forwarding.
+
+![Public IP Address](https://hackmd.io/_uploads/ry6Fg-1WMg.png)
+
+### 3. Pengaturan Firewall
+
+Sebelum _Port Forwarding_ dapat bekerja, kita harus membuka jalur di _Virtual Router Firewall_ untuk port yang akan kita tuju (contohnya Port 22 untuk SSH).
+
+1. Pada halaman detail **Source NAT IP**, buka tab **Firewall**.
+2. Tambahkan rule baru:
+   - **Source CIDR:** `0.0.0.0/0` (Menerima koneksi dari semua IP)
    - **Start Port:** `22`
    - **End Port:** `23`
    - **Protocol:** `TCP`
+3. Klik **Add**.
 
-#### 2. Pengaturan Port Forwarding
+![Firewall](https://hackmd.io/_uploads/Hy2eMZ1-zx.png)
 
-1. Buka tab **Port Forwarding**.
-2. Tambahkan rule dengan parameter:
+### 4. Port Forwarding for SSH
+
+Setelah Firewall dibuka, tahap terakhir adalah meneruskan lalu lintas (Port Forward) dari IP Publik tersebut ke IP Private milik VM.
+
+1. Buka tab **Port Forwarding** di halaman yang sama.
+2. Tambahkan rule dengan parameter berikut:
    - **Private Start Port:** `22`
    - **Private End Port:** `23`
    - **Public Start Port:** `22`
    - **Public End Port:** `23`
    - **Protocol:** `TCP`
-3. Klik **Add**, lalu pilih VM tujuan dan konfirmasi.
+3. Klik **Add**, lalu pada jendela _pop-up_, pilih VM yang telah Anda buat sebagai tujuan, kemudian konfirmasi.
 
-Setelah konfigurasi selesai, VM dapat diakses melalui SSH menggunakan Source NAT IP address dari komputer lain yang berada dalam jaringan yang sama:
+![Port Forwarding for SSH](https://hackmd.io/_uploads/SkJg-Zk-zl.png)
+
+Setelah konfigurasi selesai, VM dapat diakses melalui SSH secara aman menggunakan Source NAT IP address:
 
 ```bash
 ssh <username>@<source-nat-ip>
 ```
+
+> **Alternatif akses:** Selain port forwarding, Anda juga dapat menginstal layanan VPN modern seperti **Tailscale** secara langsung di dalam VM. Dengan Tailscale, Anda bisa mengakses VM secara aman dari mana saja tanpa harus membuka port publik.
